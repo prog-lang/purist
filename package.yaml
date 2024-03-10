@@ -21,6 +21,9 @@ description: Please see the README on GitHub at <https://github.com/prog-lang/pu
 
 dependencies:
 - base >= 4.7 && < 5
+- parsec >= 3.1.16.1
+- mtl >= 2.3.1
+- unordered-containers >= 0.2.20
 
 ghc-options:
 - -Wall

@@ -6,9 +6,9 @@ cabal-version: 2.2
 
 name:           purist
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/purist#readme>
-homepage:       https://github.com/githubuser/purist#readme
-bug-reports:    https://github.com/githubuser/purist/issues
+description:    Please see the README on GitHub at <https://github.com/prog-lang/purist#readme>
+homepage:       https://github.com/prog-lang/purist#readme
+bug-reports:    https://github.com/prog-lang/purist/issues
 author:         Author name here
 maintainer:     example@example.com
 copyright:      2024 Author name here
@@ -21,11 +21,12 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/purist
+  location: https://github.com/prog-lang/purist
 
 library
   exposed-modules:
       Lib
+      Parser
   other-modules:
       Paths_purist
   autogen-modules:
@@ -35,6 +36,9 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , mtl >=2.3.1
+    , parsec >=3.1.16.1
+    , unordered-containers >=0.2.20
   default-language: Haskell2010
 
 executable purist-exe
@@ -48,7 +52,10 @@ executable purist-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , mtl >=2.3.1
+    , parsec >=3.1.16.1
     , purist
+    , unordered-containers >=0.2.20
   default-language: Haskell2010
 
 test-suite purist-test
@@ -63,5 +70,8 @@ test-suite purist-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , mtl >=2.3.1
+    , parsec >=3.1.16.1
     , purist
+    , unordered-containers >=0.2.20
   default-language: Haskell2010
