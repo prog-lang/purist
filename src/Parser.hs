@@ -1,16 +1,19 @@
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
 module Parser
-  ( parse,
-    ast,
-    decl,
-    expr,
+  ( Display (..),
+    Ast (..),
     Expr (..),
+    parse,
+    ast,
   )
 where
 
 import Data.Functor ((<&>))
+import Data.Functor.Identity (Identity)
 import Data.HashMap.Strict (HashMap)
 import qualified Data.HashMap.Strict as HashMap
 import Data.List (intercalate)
@@ -36,7 +39,18 @@ import Text.Parsec
 import qualified Text.Parsec as Parsec
 import Text.Parsec.String (Parser)
 
-parse rule = Parsec.parse rule "(source)"
+-- PARSE
+
+parse ::
+  (Parsec.Stream s Identity t) =>
+  Parsec.Parsec s () a ->
+  s ->
+  Either Parsec.ParseError a
+parse rule = Parsec.parse rule "list of definitions"
+
+-- TYPES
+
+newtype Ast = Ast (HashMap String Expr)
 
 data Expr
   = Lam String Expr
@@ -44,13 +58,43 @@ data Expr
   | Id String
   | Str String
   | Int Int
-  deriving (Show, Eq)
+  deriving (Eq)
 
-ast :: Parser (HashMap String Expr)
-ast = endBy decl spaces <* eof <&> HashMap.fromList
+-- DISPLAY
 
-decl :: Parser (String, Expr)
-decl = do
+class Display t where
+  wrapped :: Bool -> t -> String
+
+  display :: t -> String
+  display = wrapped False
+
+  wrap :: t -> String
+  wrap = wrapped True
+
+instance Display Ast where
+  wrapped :: Bool -> Ast -> String
+  wrapped _ (Ast hmap) = unlines $ map display $ HashMap.toList $ hmap
+
+instance Display (String, Expr) where
+  wrapped :: Bool -> (String, Expr) -> String
+  wrapped _ (left, ex) = left ++ " := " ++ display ex ++ ";"
+
+instance Display Expr where
+  wrapped :: Bool -> Expr -> String
+  wrapped _ (Int i) = show i
+  wrapped _ (Str s) = show s
+  wrapped _ (Id s) = s
+  wrapped False (App ex exs) = unwords $ map wrap (ex : exs)
+  wrapped False (Lam p ex) = "\\" ++ p ++ " -> " ++ display ex
+  wrapped True ex = "(" ++ display ex ++ ")"
+
+-- PARSERS
+
+ast :: Parser Ast
+ast = endBy def spaces <* eof <&> Ast . HashMap.fromList
+
+def :: Parser (String, Expr)
+def = do
   n <- name
   _ <- spaces >> string ":=" >> spaces
   e <- expr

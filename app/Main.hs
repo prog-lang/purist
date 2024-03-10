@@ -1,6 +1,6 @@
 module Main (main) where
 
-import Parser (ast, parse)
+import Parser (Display (display), ast, parse)
 
 main :: IO ()
 main = interact readParseAndShow
@@ -8,4 +8,4 @@ main = interact readParseAndShow
 readParseAndShow :: String -> String
 readParseAndShow input = case parse ast input of
   Left err -> show err
-  Right parsed -> show parsed
+  Right parsed -> display parsed
