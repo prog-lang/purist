@@ -3,19 +3,17 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Parser
+module Pure.Source.Parser
   ( Display (..),
     Ast (..),
     Expr (..),
     parse,
     ast,
+    expr,
   )
 where
 
 import Data.Functor ((<&>))
-import Data.Functor.Identity (Identity)
-import Data.HashMap.Strict (HashMap)
-import qualified Data.HashMap.Strict as HashMap
 import Data.List (intercalate)
 import Data.Maybe (isJust)
 import Text.Parsec
@@ -34,6 +32,7 @@ import Text.Parsec
     spaces,
     string,
     try,
+    (<?>),
     (<|>),
   )
 import qualified Text.Parsec as Parsec
@@ -41,16 +40,12 @@ import Text.Parsec.String (Parser)
 
 -- PARSE
 
-parse ::
-  (Parsec.Stream s Identity t) =>
-  Parsec.Parsec s () a ->
-  s ->
-  Either Parsec.ParseError a
-parse rule = Parsec.parse rule "list of definitions"
+parse :: Parsec.SourceName -> String -> Either Parsec.ParseError Ast
+parse = Parsec.parse ast
 
 -- TYPES
 
-newtype Ast = Ast (HashMap String Expr)
+newtype Ast = Ast [(String, Expr)]
 
 data Expr
   = Lam String Expr
@@ -73,7 +68,7 @@ class Display t where
 
 instance Display Ast where
   wrapped :: Bool -> Ast -> String
-  wrapped _ (Ast hmap) = unlines $ map display $ HashMap.toList $ hmap
+  wrapped _ (Ast defs) = unlines $ map display defs
 
 instance Display (String, Expr) where
   wrapped :: Bool -> (String, Expr) -> String
@@ -91,7 +86,7 @@ instance Display Expr where
 -- PARSERS
 
 ast :: Parser Ast
-ast = endBy def spaces <* eof <&> Ast . HashMap.fromList
+ast = endBy def spaces <* eof <&> Ast
 
 def :: Parser (String, Expr)
 def = do
@@ -99,7 +94,7 @@ def = do
   _ <- spaces >> string ":=" >> spaces
   e <- expr
   _ <- spaces >> char ';'
-  return (n, e)
+  return (n, e) <?> "a definition"
 
 expr :: Parser Expr
 expr = try lambda <|> try app <|> lit
@@ -107,7 +102,7 @@ expr = try lambda <|> try app <|> lit
 lambda :: Parser Expr
 lambda = do
   p <- param
-  Lam p <$> expr
+  Lam p <$> expr <?> "a lambda literal"
   where
     param :: Parser String
     param = do
@@ -121,7 +116,7 @@ app = do
   f <- fun
   _ <- spaces
   args <- sepBy1 lit spaces
-  return $ App f args
+  return (App f args) <?> "a function application"
 
 fun :: Parser Expr
 fun = try brack <|> Id <$> try identifier <|> Id <$> name
@@ -129,10 +124,14 @@ fun = try brack <|> Id <$> try identifier <|> Id <$> name
 lit :: Parser Expr
 lit =
   try brack
-    <|> Id <$> try identifier
-    <|> Id <$> try name
-    <|> Str <$> try str
-    <|> Int <$> int
+    <|> Id
+      <$> try identifier
+    <|> Id
+      <$> try name
+    <|> Str
+      <$> try str
+    <|> Int
+      <$> int
 
 brack :: Parser Expr
 brack = between (char '(' >> spaces) (spaces >> char ')') expr
@@ -140,19 +139,19 @@ brack = between (char '(' >> spaces) (spaces >> char ')') expr
 identifier :: Parser String
 identifier = do
   parts <- sepBy1 name $ char '.'
-  return $ intercalate "." parts
+  return (intercalate "." parts) <?> "an identifier"
 
 name :: Parser String
 name = do
   l <- many1 $ lower <|> char '_'
   ls <- many $ Parsec.alphaNum <|> char '_'
-  return $ l ++ ls
+  return (l ++ ls) <?> "a name"
 
 str :: Parser String
-str = between (char '"') (char '"') (many $ noneOf ['"'])
+str = between (char '"') (char '"') (many $ noneOf ['"']) <?> "a string literal"
 
 int :: Parser Int
-int = try zero <|> nonZero
+int = try zero <|> nonZero <?> "an int literal"
   where
     zero = char '0' >> return 0
 

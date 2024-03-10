@@ -25,8 +25,9 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
-      Parser
+      Fun
+      Pure.Source.Checks
+      Pure.Source.Parser
   other-modules:
       Paths_purist
   autogen-modules:
@@ -36,6 +37,7 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , extra >=1.7.14
     , mtl >=2.3.1
     , parsec >=3.1.16.1
     , unordered-containers >=0.2.20
@@ -52,6 +54,7 @@ executable purist-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , extra >=1.7.14
     , mtl >=2.3.1
     , parsec >=3.1.16.1
     , purist
@@ -70,6 +73,7 @@ test-suite purist-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , extra >=1.7.14
     , mtl >=2.3.1
     , parsec >=3.1.16.1
     , purist
