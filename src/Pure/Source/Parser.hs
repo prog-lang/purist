@@ -66,6 +66,12 @@ class Display t where
   wrap :: t -> String
   wrap = wrapped True
 
+instance Show Ast where
+  show = display
+
+instance Show Expr where
+  show = display
+
 instance Display Ast where
   wrapped :: Bool -> Ast -> String
   wrapped _ (Ast defs) = unlines $ map display defs
@@ -94,15 +100,15 @@ def = do
   _ <- spaces >> string ":=" >> spaces
   e <- expr
   _ <- spaces >> char ';'
-  return (n, e) <?> "a definition"
+  return (n, e)
 
 expr :: Parser Expr
-expr = try lambda <|> try app <|> lit
+expr = try lambda <|> try app <|> lit <?> "an expression"
 
 lambda :: Parser Expr
 lambda = do
-  p <- param
-  Lam p <$> expr <?> "a lambda literal"
+  p <- param <?> "a named parameter"
+  Lam p <$> expr
   where
     param :: Parser String
     param = do
@@ -113,39 +119,40 @@ lambda = do
 
 app :: Parser Expr
 app = do
-  f <- fun
+  f <- fun <?> "a caller function/expression"
   _ <- spaces
-  args <- sepBy1 lit spaces
-  return (App f args) <?> "a function application"
+  args <- sepBy1 lit spaces <?> "a list of arguments"
+  return (App f args)
 
 fun :: Parser Expr
-fun = try brack <|> Id <$> try identifier <|> Id <$> name
+fun =
+  try brack
+    <|> Id <$> try identifier
+    <|> Id <$> name
 
 lit :: Parser Expr
 lit =
   try brack
-    <|> Id
-      <$> try identifier
-    <|> Id
-      <$> try name
-    <|> Str
-      <$> try str
-    <|> Int
-      <$> int
+    <|> Id <$> try identifier
+    <|> Id <$> try name
+    <|> Str <$> try str
+    <|> Int <$> int
 
 brack :: Parser Expr
 brack = between (char '(' >> spaces) (spaces >> char ')') expr
 
 identifier :: Parser String
 identifier = do
-  parts <- sepBy1 name $ char '.'
-  return (intercalate "." parts) <?> "an identifier"
+  parts <- sepBy1 name (char '.') <?> "an identifier"
+  return (intercalate "." parts)
 
 name :: Parser String
 name = do
-  l <- many1 $ lower <|> char '_'
-  ls <- many $ Parsec.alphaNum <|> char '_'
-  return (l ++ ls) <?> "a name"
+  l <- many1 (lower <|> char '_' <?> err)
+  ls <- many (Parsec.alphaNum <|> char '_' <?> err)
+  return (l ++ ls)
+  where
+    err = "a name"
 
 str :: Parser String
 str = between (char '"') (char '"') (many $ noneOf ['"']) <?> "a string literal"
