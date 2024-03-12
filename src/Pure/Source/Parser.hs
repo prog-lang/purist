@@ -1,21 +1,11 @@
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE OverloadedStrings #-}
 
-module Pure.Source.Parser
-  ( Display (..),
-    Ast (..),
-    Expr (..),
-    parse,
-    ast,
-    expr,
-  )
-where
+module Pure.Source.Parser (parse, ast, expr) where
 
 import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Maybe (isJust)
+import Pure.AST (AST (..), Expr (..))
 import Text.Parsec
   ( between,
     char,
@@ -38,61 +28,11 @@ import Text.Parsec
 import qualified Text.Parsec as Parsec
 import Text.Parsec.String (Parser)
 
--- PARSE
-
-parse :: Parsec.SourceName -> String -> Either Parsec.ParseError Ast
+parse :: Parsec.SourceName -> String -> Either Parsec.ParseError AST
 parse = Parsec.parse ast
 
--- TYPES
-
-newtype Ast = Ast [(String, Expr)]
-
-data Expr
-  = Lam String Expr
-  | App Expr [Expr]
-  | Id String
-  | Str String
-  | Int Int
-  deriving (Eq)
-
--- DISPLAY
-
-class Display t where
-  wrapped :: Bool -> t -> String
-
-  display :: t -> String
-  display = wrapped False
-
-  wrap :: t -> String
-  wrap = wrapped True
-
-instance Show Ast where
-  show = display
-
-instance Show Expr where
-  show = display
-
-instance Display Ast where
-  wrapped :: Bool -> Ast -> String
-  wrapped _ (Ast defs) = unlines $ map display defs
-
-instance Display (String, Expr) where
-  wrapped :: Bool -> (String, Expr) -> String
-  wrapped _ (left, ex) = left ++ " := " ++ display ex ++ ";"
-
-instance Display Expr where
-  wrapped :: Bool -> Expr -> String
-  wrapped _ (Int i) = show i
-  wrapped _ (Str s) = show s
-  wrapped _ (Id s) = s
-  wrapped False (App ex exs) = unwords $ map wrap (ex : exs)
-  wrapped False (Lam p ex) = "\\" ++ p ++ " -> " ++ display ex
-  wrapped True ex = "(" ++ display ex ++ ")"
-
--- PARSERS
-
-ast :: Parser Ast
-ast = endBy def spaces <* eof <&> Ast
+ast :: Parser AST
+ast = endBy def spaces <* eof <&> AST
 
 def :: Parser (String, Expr)
 def = do
@@ -112,7 +52,6 @@ lambda = do
   where
     param :: Parser String
     param = do
-      _ <- char '\\'
       n <- name
       _ <- spaces >> string "->" >> spaces
       return n

@@ -2,8 +2,9 @@ module Main (main) where
 
 import Data.Either.Extra (fromEither)
 import Fun ((!>))
+import Pure.AST
 import Pure.Source.Checks (duplicateDefinitions)
-import Pure.Source.Parser (Ast (..), Display (display), parse)
+import Pure.Source.Parser (parse)
 
 main :: IO ()
 main = interact readParseAndShow
@@ -14,5 +15,5 @@ readParseAndShow input =
     Left err -> show err
     Right parsed -> check parsed
 
-check :: Ast -> String
+check :: AST -> String
 check = duplicateDefinitions !> fmap display !> fromEither

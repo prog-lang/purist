@@ -1,3 +1,5 @@
+-- | module Fun contains convenient functional primitives used
+-- around the codebase.
 module Fun ((!>), (|>)) where
 
 infixl 2 |> -- function application

@@ -1,23 +1,19 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Pure.Source.Checks
-  ( duplicateDefinitions,
-    entrypointPresent,
-  )
-where
+module Pure.Source.Checks (duplicateDefinitions, entrypointPresent) where
 
 import Data.List (intercalate, nub, (\\))
-import Pure.Source.Parser (Ast (..))
+import Pure.AST (AST (..))
 
 -- TYPES
 
 type Error = String
 
-type Result = Either Error Ast
+type Result = Either Error AST
 
 -- CHECKS
 
-duplicateDefinitions :: Ast -> Result
+duplicateDefinitions :: AST -> Result
 duplicateDefinitions ast =
   if null duplicates
     then Right ast
@@ -29,7 +25,7 @@ duplicateDefinitions ast =
     unique = nub ns
     ns = names ast
 
-entrypointPresent :: Ast -> Result
+entrypointPresent :: AST -> Result
 entrypointPresent ast =
   if elem entrypoint $ names ast
     then Right ast
@@ -40,5 +36,5 @@ entrypointPresent ast =
 
 -- UTILS
 
-names :: Ast -> [String]
-names (Ast defs) = map fst defs
+names :: AST -> [String]
+names (AST defs) = map fst defs

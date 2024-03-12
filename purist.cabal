@@ -26,6 +26,7 @@ source-repository head
 library
   exposed-modules:
       Fun
+      Pure.AST
       Pure.Source.Checks
       Pure.Source.Parser
   other-modules:
