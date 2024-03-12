@@ -9,13 +9,9 @@ import Pure.AST (AST (..), Expr (..))
 import Text.Parsec
   ( between,
     char,
-    digit,
     endBy,
     eof,
-    many,
     many1,
-    noneOf,
-    oneOf,
     optionMaybe,
     sepBy1,
     spaces,
@@ -25,8 +21,10 @@ import Text.Parsec
     (<|>),
   )
 import qualified Text.Parsec as Parsec
-import Text.Parsec.Number (floating)
+import Text.Parsec.Language (haskellDef)
+import Text.Parsec.Number (floating, int)
 import Text.Parsec.String (Parser)
+import Text.Parsec.Token (GenTokenParser (stringLiteral), makeTokenParser)
 
 parseModule :: Parsec.SourceName -> String -> Either Parsec.ParseError AST
 parseModule = Parsec.parse ast
@@ -83,13 +81,13 @@ app = do
 fun :: Parser Expr
 fun =
   try brack
-    <|> Id <$> try identifier
+    <|> Id <$> try ident
     <|> Id <$> name
 
 lit :: Parser Expr
 lit =
   try brack
-    <|> Id <$> try identifier
+    <|> Id <$> try ident
     <|> Id <$> try name
     <|> Str <$> try str
     <|> Float <$> try float
@@ -98,8 +96,8 @@ lit =
 brack :: Parser Expr
 brack = between (char '(' >> spaces) (spaces >> char ')') expr
 
-identifier :: Parser String
-identifier = do
+ident :: Parser String
+ident = do
   parts <- sepBy1 name (char '.') <?> "an identifier"
   return (intercalate "." parts)
 
@@ -107,25 +105,10 @@ name :: Parser String
 name = many1 (Parsec.alphaNum <|> char '_' <?> "a name")
 
 str :: Parser String
-str = between (char '"') (char '"') (many $ noneOf ['"']) <?> "a string literal"
+str = stringLiteral $ makeTokenParser haskellDef
 
 float :: Parser Double
 float = do
   sign <- optionMaybe $ char '-'
   number <- floating
   return $ if isJust sign then -number else number
-
-int :: Parser Int
-int = try zero <|> nonZero <?> "an int literal"
-  where
-    zero = char '0' >> return 0
-
-    positive = do
-      firstDigit <- oneOf ['1' .. '9'] -- Ensures the first digit is not '0'
-      restDigits <- many digit -- The rest can be any digit
-      return $ read $ firstDigit : restDigits
-
-    nonZero = do
-      sign <- optionMaybe $ char '-'
-      number <- positive
-      return $ if isJust sign then -number else number
