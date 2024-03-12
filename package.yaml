@@ -26,6 +26,7 @@ dependencies:
 - unordered-containers >= 0.2.20
 - extra >= 1.7.14
 - parsec3-numbers >= 0.1.0
+- text >= 2.0.2
 
 ghc-options:
 - -Wall

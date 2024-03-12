@@ -1,6 +1,9 @@
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE TypeSynonymInstances #-}
+
 -- | module Fun contains convenient functional primitives used
 -- around the codebase.
-module Fun ((!>), (|>)) where
+module Fun ((!>), (|>), Wrap (..)) where
 
 infixl 2 |> -- function application
 
@@ -11,3 +14,16 @@ infixl 9 !> -- functional chaining
 
 (!>) :: (a -> b) -> (b -> c) -> a -> c
 f !> g = g . f
+
+infixl 6 >*
+
+infixl 6 *<
+
+class (Semigroup a) => Wrap a where
+  (>*) :: a -> a -> a
+  x >* y = x <> y <> x
+
+  (*<) :: a -> a -> a
+  (*<) = flip (>*)
+
+instance Wrap String

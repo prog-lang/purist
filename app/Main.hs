@@ -2,7 +2,7 @@ module Main (main) where
 
 import Data.Either.Extra (fromEither)
 import Fun ((!>))
-import Pure.AST (AST, Display (display))
+import Pure.AST (Display (display), Module)
 import Pure.Source.Checks (duplicateDefinitions)
 import Pure.Source.Parser (parseModule)
 
@@ -15,5 +15,5 @@ readParseAndShow input =
     Left err -> show err
     Right parsed -> check parsed
 
-check :: AST -> String
+check :: Module -> String
 check = duplicateDefinitions !> fmap display !> fromEither
