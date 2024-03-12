@@ -1,5 +1,4 @@
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE InstanceSigs #-}
 
 module Pure.AST
   ( Module (..),
@@ -9,7 +8,6 @@ module Pure.AST
     Visibility (..),
     visibilityFromMaybe,
     Expr (..),
-    Display (..),
   )
 where
 
@@ -48,44 +46,49 @@ moduleNames (Module ss) = map defName ss
 defName :: Statement -> String
 defName (Def _ nom _) = nom
 
--- DISPLAY
-
-class Display t where
-  wrapped :: Bool -> t -> String
-
-  display :: t -> String
-  display = wrapped False
-
-  wrap :: t -> String
-  wrap = wrapped True
-
-instance Display Module where
-  wrapped :: Bool -> Module -> String
-  wrapped _ (Module defs) = unlines $ map display defs
-
-instance Display Statement where
-  wrapped :: Bool -> Statement -> String
-  wrapped _ (Def vis name expr) = show vis ++ name ++ " " >* S.walrus ++ display expr ++ S.str S.semicolon
-
-instance Display Expr where
-  wrapped :: Bool -> Expr -> String
-  wrapped _ (Int i) = show i
-  wrapped _ (Float f) = show f
-  wrapped _ (Str s) = show s
-  wrapped _ (Id s) = s
-  wrapped False (App ex exs) = unwords $ map wrap (ex : exs)
-  wrapped False (If b l r) = S.if_ ++ " " >* display b ++ S.then_ ++ " " >* display l ++ S.else_ ++ " " ++ display r
-  wrapped False (Lam p ex) = p ++ " " >* S.arrow ++ display ex
-  wrapped True ex = S.str S.lbrace ++ display ex ++ S.str S.rbrace
+isIf :: Expr -> Bool
+isIf (If {}) = True
+isIf _ = False
 
 -- SHOW
 
+embrace :: Expr -> String
+embrace (Int i) = show i
+embrace (Float f) = show f
+embrace (Str s) = show s
+embrace (Id s) = s
+embrace ex = S.str S.lbrace ++ show ex ++ S.str S.rbrace
+
+embraceIf :: (Expr -> Bool) -> Expr -> String
+embraceIf check ex = if check ex then embrace ex else show ex
+
 instance Show Module where
-  show = display
+  show (Module defs) = unlines $ map show defs
+
+instance Show Statement where
+  show (Def vis name expr) =
+    show vis
+      ++ name
+      ++ " " >* S.walrus
+      ++ show expr
+      ++ S.str S.semicolon
 
 instance Show Visibility where
   show Private = ""
   show Public = S.public ++ " "
 
 instance Show Expr where
-  show = display
+  show (Int i) = show i
+  show (Float f) = show f
+  show (Str s) = show s
+  show (Id s) = s
+  show (App ex exs) = unwords $ map embrace (ex : exs)
+  show (If b l r) =
+    S.if_
+      ++ " " >* show b
+      ++ S.then_
+      ++ " " >* embraceIf isIf l
+      ++ S.else_
+      ++ " "
+      ++ show r
+  show (Lam p ex) = p ++ " " >* S.arrow ++ show ex
