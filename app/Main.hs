@@ -2,16 +2,16 @@ module Main (main) where
 
 import Data.Either.Extra (fromEither)
 import Fun ((!>))
-import Pure.AST
+import Pure.AST (AST, Display (display))
 import Pure.Source.Checks (duplicateDefinitions)
-import Pure.Source.Parser (parse)
+import Pure.Source.Parser (parseModule)
 
 main :: IO ()
 main = interact readParseAndShow
 
 readParseAndShow :: String -> String
 readParseAndShow input =
-  case parse "main.pure" input of
+  case parseModule "main.pure" input of
     Left err -> show err
     Right parsed -> check parsed
 

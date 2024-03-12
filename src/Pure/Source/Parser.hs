@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Pure.Source.Parser (parse, ast, expr) where
+module Pure.Source.Parser (parseModule, ast, expr) where
 
 import Data.Functor ((<&>))
 import Data.List (intercalate)
@@ -12,7 +12,6 @@ import Text.Parsec
     digit,
     endBy,
     eof,
-    lower,
     many,
     many1,
     noneOf,
@@ -26,10 +25,11 @@ import Text.Parsec
     (<|>),
   )
 import qualified Text.Parsec as Parsec
+import Text.Parsec.Number (floating)
 import Text.Parsec.String (Parser)
 
-parse :: Parsec.SourceName -> String -> Either Parsec.ParseError AST
-parse = Parsec.parse ast
+parseModule :: Parsec.SourceName -> String -> Either Parsec.ParseError AST
+parseModule = Parsec.parse ast
 
 ast :: Parser AST
 ast = endBy def spaces <* eof <&> AST
@@ -43,18 +43,35 @@ def = do
   return (n, e)
 
 expr :: Parser Expr
-expr = try lambda <|> try app <|> lit <?> "an expression"
+expr = try lambda <|> try iff <|> try app <|> lit <?> "an expression"
 
 lambda :: Parser Expr
 lambda = do
   p <- param <?> "a named parameter"
-  Lam p <$> expr
+  ex <- expr
+  return $ Lam p ex
   where
     param :: Parser String
     param = do
       n <- name
       _ <- spaces >> string "->" >> spaces
       return n
+
+iff :: Parser Expr
+iff = do
+  _ <- string "if" >> spaces
+  b <- condition <?> "a condition"
+  _ <- spaces >> string "then" >> spaces
+  l <- noIf <?> "a left-hand-side expression"
+  _ <- spaces >> string "else" >> spaces
+  r <- expr <?> "a right-hand-side expression"
+  return $ If b l r
+
+condition :: Parser Expr
+condition = try app <|> lit
+
+noIf :: Parser Expr
+noIf = try lambda <|> try app <|> lit
 
 app :: Parser Expr
 app = do
@@ -75,6 +92,7 @@ lit =
     <|> Id <$> try identifier
     <|> Id <$> try name
     <|> Str <$> try str
+    <|> Float <$> try float
     <|> Int <$> int
 
 brack :: Parser Expr
@@ -86,15 +104,16 @@ identifier = do
   return (intercalate "." parts)
 
 name :: Parser String
-name = do
-  l <- many1 (lower <|> char '_' <?> err)
-  ls <- many (Parsec.alphaNum <|> char '_' <?> err)
-  return (l ++ ls)
-  where
-    err = "a name"
+name = many1 (Parsec.alphaNum <|> char '_' <?> "a name")
 
 str :: Parser String
 str = between (char '"') (char '"') (many $ noneOf ['"']) <?> "a string literal"
+
+float :: Parser Double
+float = do
+  sign <- optionMaybe $ char '-'
+  number <- floating
+  return $ if isJust sign then -number else number
 
 int :: Parser Int
 int = try zero <|> nonZero <?> "an int literal"
