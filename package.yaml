@@ -27,6 +27,8 @@ dependencies:
 - extra >= 1.7.14
 - parsec3-numbers >= 0.1.0
 - text >= 2.0.2
+- hspec >= 2.11.7
+- QuickCheck >= 2.14.3
 
 ghc-options:
 - -Wall
