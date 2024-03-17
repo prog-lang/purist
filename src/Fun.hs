@@ -4,7 +4,7 @@
 -- around the codebase.
 module Fun ((!>), (|>), Wrap (..)) where
 
-infixl 2 |> -- function application
+infixl 0 |> -- function application
 
 (|>) :: t1 -> (t1 -> t2) -> t2
 x |> f = f x
