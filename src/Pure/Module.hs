@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Pure.AST
+module Pure.Module
   ( Module (..),
     moduleNames,
     Statement (..),

@@ -7,15 +7,19 @@ module Pure.Source.Parser (parseModule, ast, expr) where
 import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Maybe (isJust)
-import Pure.AST
+import Fun ((!>))
+import Pure.Module
   ( Expr (..),
     Module (..),
     Statement (..),
     visibilityFromMaybe,
   )
 import qualified Pure.Source.Sacred as S
+import Result (Result)
+import qualified Result
 import Text.Parsec
-  ( between,
+  ( ParseError,
+    between,
     char,
     endBy,
     eof,
@@ -34,8 +38,8 @@ import Text.Parsec.Number (floating, int)
 import Text.Parsec.String (Parser)
 import Text.Parsec.Token (GenTokenParser (stringLiteral), makeTokenParser)
 
-parseModule :: Parsec.SourceName -> String -> Either Parsec.ParseError Module
-parseModule = Parsec.parse ast
+parseModule :: Parsec.SourceName -> String -> Result ParseError Module
+parseModule sourceName = Parsec.parse ast sourceName !> Result.fromEither
 
 ast :: Parser Module
 ast = endBy def spaces <* eof <&> Module
