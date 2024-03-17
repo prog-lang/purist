@@ -26,9 +26,11 @@ source-repository head
 library
   exposed-modules:
       Fun
+      NodeJS.CommonJS
+      NodeJS.Sacred
       NodeJS.Transpiler
+      Pure.Checks
       Pure.Module
-      Pure.Source.Checks
       Pure.Source.Parser
       Pure.Source.Sacred
       Result
