@@ -2,7 +2,7 @@ module Main (main) where
 
 import Fun ((|>))
 import NodeJS.Transpiler (transpile)
-import Pure.Source.Checks (duplicateDefinitions)
+import Pure.Checks (duplicateDefinitions)
 import Pure.Source.Parser (parseModule)
 import Result (unwrap, (<!>))
 

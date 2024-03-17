@@ -25,4 +25,4 @@ class (Semigroup a) => Wrap a where
   (*<) :: a -> a -> a
   (*<) = flip (>*)
 
-instance Wrap String
+instance Wrap [Char]
