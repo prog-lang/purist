@@ -51,3 +51,6 @@ lbracket = "{"
 
 rbracket :: String
 rbracket = "}"
+
+arrow :: String
+arrow = "=>"

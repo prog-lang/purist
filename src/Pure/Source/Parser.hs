@@ -1,6 +1,13 @@
+{-# HLINT ignore "Use <$>" #-}
+{-# LANGUAGE NamedFieldPuns #-}
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 
-{-# HLINT ignore "Use <$>" #-}
+{-
+SOME DOCS:
+- https://wiki.haskell.org/Parsing_expressions_and_statements
+- https://hackage.haskell.org/package/parsec-3.1.16.1/docs/src/Text.Parsec.Language.html#haskellDef
+- https://hackage.haskell.org/package/parsec-3.1.16.1/docs/src/Text.Parsec.Token.html#GenTokenParser
+-}
 
 module Pure.Source.Parser (parseModule, ast, expr) where
 
@@ -19,6 +26,7 @@ import Result (Result)
 import qualified Result
 import Text.Parsec
   ( ParseError,
+    alphaNum,
     between,
     char,
     endBy,
@@ -116,7 +124,7 @@ ident = do
   return (intercalate (S.str S.dot) parts)
 
 name :: Parser String
-name = many1 (Parsec.alphaNum <|> char S.underscore <?> "a name")
+name = many1 (alphaNum <|> char S.underscore <?> "a name")
 
 str :: Parser String
 str = stringLiteral $ makeTokenParser haskellDef

@@ -3,6 +3,7 @@
 module Pure.Module
   ( Module (..),
     moduleNames,
+    public,
     Statement (..),
     defName,
     Visibility (..),
@@ -11,7 +12,7 @@ module Pure.Module
   )
 where
 
-import Fun ((>*))
+import Fun (Wrap (..), (>*))
 import qualified Pure.Source.Sacred as S
 
 -- TYPES
@@ -43,8 +44,15 @@ visibilityFromMaybe _ = Private
 moduleNames :: Module -> [String]
 moduleNames (Module ss) = map defName ss
 
+public :: Module -> [String]
+public (Module ss) = map defName $ filter isPublic ss
+
 defName :: Statement -> String
 defName (Def _ nom _) = nom
+
+isPublic :: Statement -> Bool
+isPublic (Def Private _ _) = False
+isPublic (Def Public _ _) = True
 
 isIf :: Expr -> Bool
 isIf (If {}) = True

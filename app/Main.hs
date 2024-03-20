@@ -1,17 +1,31 @@
 module Main (main) where
 
+import Convert (Into (..))
 import Fun ((|>))
-import NodeJS.Transpiler (transpile)
+import qualified NodeJS.CommonJS as JS
+import NodeJS.Transpiler ()
 import Pure.Checks (duplicateDefinitions)
+import qualified Pure.Module as Pure
 import Pure.Source.Parser (parseModule)
-import Result (unwrap, (<!>))
+import Result (Result, unwrap, (<!>))
 
 main :: IO ()
 main = interact with
 
 with :: String -> String
 with input =
-  show <!> parseModule "main.pure" input
-    >>= duplicateDefinitions
-    >>= transpile
-      |> unwrap
+  show
+    <!> parseModule "main.pure" input
+    |> check
+    |> intoJS
+    |> intoCode
+    |> unwrap
+
+check :: Result String Pure.Module -> Result String Pure.Module
+check = (>>= duplicateDefinitions)
+
+intoJS :: Result String Pure.Module -> Result String JS.Module
+intoJS = fmap into
+
+intoCode :: Result String JS.Module -> Result String String
+intoCode = fmap show
