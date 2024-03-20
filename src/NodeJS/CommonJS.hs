@@ -1,16 +1,20 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE MonoLocalBinds #-}
 
-module NodeJS.CommonJS (Statement (..), Expr (..)) where
+module NodeJS.CommonJS (Module (..), Statement (..), Expr (..)) where
 
 import Data.List (intercalate)
-import Fun ((>*))
+import Fun (Wrap (..), (>*))
 import qualified NodeJS.Sacred as S
 
 -- TYPES
 
 -- | Any valid CommonJS identifier
 type Id = String
+
+newtype Module = Module [Statement]
 
 data Statement
   = Const Id Expr
@@ -19,6 +23,7 @@ data Statement
   | Assign Id Expr
   | Return Expr
   | Exports [Id]
+  | Function Id [Id] [Statement]
   deriving (Eq)
 
 data Expr
@@ -28,8 +33,8 @@ data Expr
   | Id Id
   | New Id [Expr]
   | Ternary Expr Expr Expr
-  | Function [Id] [Statement]
   | Call Expr [Expr]
+  | Lam [Id] [Statement]
   deriving (Eq)
 
 -- INSPECT
@@ -59,6 +64,10 @@ braced a = S.lbrace ++ a ++ S.rbrace
 bracketed :: String -> String
 bracketed a = S.lbracket ++ a ++ S.rbracket
 
+instance Show Module where
+  show :: Module -> String
+  show (Module ss) = unlines $ map show ss
+
 instance Show Statement where
   show :: Statement -> String
   show (Const ident ex) = S.const ++ " " ++ ident ++ " " >* S.assign ++ show ex ++ S.semicolon
@@ -67,6 +76,10 @@ instance Show Statement where
   show (Assign ident ex) = ident ++ " " >* S.assign ++ show ex ++ S.semicolon
   show (Return ex) = S.return ++ " " ++ show ex ++ S.semicolon
   show (Exports ids) = S.exports ++ " " >* S.assign ++ bracketed (commad ids)
+  show (Function name ids ss) = S.function ++ " " ++ name ++ params ++ " " ++ body
+    where
+      params = braced $ commad ids
+      body = bracketed $ unwords $ map show ss
 
 instance Show Expr where
   show :: Expr -> String
@@ -82,8 +95,8 @@ instance Show Expr where
       else_ = embraceIf isTernary right
       question = " " >* S.question
       colon = " " >* S.colon
-  show (Function ids ss) = S.function ++ params ++ " " ++ body
+  show (Call ex exs) = embrace ex ++ braced (commad $ map show exs)
+  show (Lam ids ss) = S.function ++ params ++ " " ++ body
     where
       params = braced $ commad ids
-      body = bracketed $ show ss
-  show (Call ex exs) = unwords $ map embrace (ex : exs)
+      body = bracketed $ unwords $ map show ss
