@@ -1,6 +1,6 @@
 module Pure.ModuleSpec (spec) where
 
-import Pure.Module (Expr (..))
+import Pure (Expr (..))
 import Test.Hspec (SpecWith, describe, it, shouldBe)
 
 spec :: SpecWith ()

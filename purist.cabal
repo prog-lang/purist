@@ -30,9 +30,9 @@ library
       NodeJS.CommonJS
       NodeJS.Sacred
       NodeJS.Transpiler
+      Pure
       Pure.Checks
-      Pure.Module
-      Pure.Source.Parser
+      Pure.Parser
       Pure.Source.Sacred
       Result
   other-modules:

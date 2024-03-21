@@ -3,8 +3,15 @@
 module Pure.Source.Sacred where
 
 import Data.List (singleton)
+import qualified Data.List as List
 
 -- KEYWORDS
+
+isKeyword :: String -> Bool
+isKeyword = flip List.elem keywords
+
+keywords :: [String]
+keywords = [public, if_, then_, else_]
 
 public :: String
 public = "public"
@@ -19,6 +26,9 @@ else_ :: String
 else_ = "else"
 
 -- SIGNS
+
+operators :: [String]
+operators = [walrus, arrow]
 
 walrus :: String
 walrus = ":="
