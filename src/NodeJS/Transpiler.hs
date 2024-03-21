@@ -8,7 +8,7 @@ module NodeJS.Transpiler where
 
 import Convert (Into (..))
 import qualified NodeJS.CommonJS as JS
-import qualified Pure.Module as Pure
+import qualified Pure
 
 type Error = String
 

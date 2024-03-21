@@ -4,9 +4,9 @@ import Convert (Into (..))
 import Fun ((|>))
 import qualified NodeJS.CommonJS as JS
 import NodeJS.Transpiler ()
+import qualified Pure
 import Pure.Checks (duplicateDefinitions)
-import qualified Pure.Module as Pure
-import Pure.Source.Parser (parseModule)
+import Pure.Parser (parseModule)
 import Result (Result, unwrap, (<!>))
 
 main :: IO ()

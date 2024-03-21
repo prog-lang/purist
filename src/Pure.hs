@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 
-module Pure.Module
+module Pure
   ( Module (..),
     moduleNames,
     public,
@@ -30,7 +30,7 @@ data Expr
   | Id String
   | Str String
   | Float Double
-  | Int Int
+  | Int Integer
   deriving (Eq)
 
 -- CONSTRUCT
@@ -54,10 +54,6 @@ isPublic :: Statement -> Bool
 isPublic (Def Private _ _) = False
 isPublic (Def Public _ _) = True
 
-isIf :: Expr -> Bool
-isIf (If {}) = True
-isIf _ = False
-
 -- SHOW
 
 embrace :: Expr -> String
@@ -66,9 +62,6 @@ embrace (Float f) = show f
 embrace (Str s) = show s
 embrace (Id s) = s
 embrace ex = S.str S.lbrace ++ show ex ++ S.str S.rbrace
-
-embraceIf :: (Expr -> Bool) -> Expr -> String
-embraceIf check ex = if check ex then embrace ex else show ex
 
 instance Show Module where
   show (Module defs) = unlines $ map show defs
@@ -91,12 +84,12 @@ instance Show Expr where
   show (Str s) = show s
   show (Id s) = s
   show (App ex exs) = unwords $ map embrace (ex : exs)
-  show (If b l r) =
+  show (If x y z) =
     S.if_
-      ++ " " >* show b
+      ++ " " >* embrace x
       ++ S.then_
-      ++ " " >* embraceIf isIf l
+      ++ " " >* embrace y
       ++ S.else_
       ++ " "
-      ++ show r
+      ++ embrace z
   show (Lam p ex) = p ++ " " >* S.arrow ++ show ex

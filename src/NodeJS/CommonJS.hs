@@ -27,7 +27,7 @@ data Statement
   deriving (Eq)
 
 data Expr
-  = Int Int
+  = Int Integer
   | Float Double
   | Str String
   | Id Id

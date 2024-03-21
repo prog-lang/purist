@@ -1,7 +1,7 @@
 module Pure.Checks (duplicateDefinitions, entrypointPresent) where
 
 import Data.List (intercalate, nub, (\\))
-import Pure.Module (Module (..), moduleNames)
+import Pure (Module (..), moduleNames)
 import Result (Result (..))
 
 -- TYPES
