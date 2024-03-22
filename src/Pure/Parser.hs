@@ -8,7 +8,7 @@ SOME DOCS:
 - https://hackage.haskell.org/package/parsec-3.1.16.1/docs/src/Text.Parsec.Token.html#GenTokenParser
 -}
 
-module Pure.Parser where
+module Pure.Parser (parseModule) where
 
 import Data.Functor ((<&>))
 import Data.List (intercalate)
