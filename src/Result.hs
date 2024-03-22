@@ -57,5 +57,5 @@ mapErr f (Err err) = Err $ f err
 
 infixr 5 <!>
 
-(<!>) :: (err -> err') -> Result err ok -> Result err' ok
-f <!> result = mapErr f result
+(<!>) :: Result err ok -> (err -> err') -> Result err' ok
+(<!>) = flip mapErr
