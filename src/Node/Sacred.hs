@@ -1,4 +1,4 @@
-module NodeJS.Sacred where
+module Node.Sacred where
 
 -- KEYWORDS
 

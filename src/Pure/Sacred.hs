@@ -1,6 +1,6 @@
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 
-module Pure.Source.Sacred where
+module Pure.Sacred where
 
 import Data.List (singleton)
 import qualified Data.List as List

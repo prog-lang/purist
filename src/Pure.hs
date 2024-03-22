@@ -13,7 +13,7 @@ module Pure
 where
 
 import Fun (Wrap (..), (>*))
-import qualified Pure.Source.Sacred as S
+import qualified Pure.Sacred as S
 
 -- TYPES
 
