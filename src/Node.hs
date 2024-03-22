@@ -3,11 +3,11 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MonoLocalBinds #-}
 
-module NodeJS.CommonJS (Module (..), Statement (..), Expr (..)) where
+module Node (Module (..), Statement (..), Expr (..)) where
 
 import Data.List (intercalate)
 import Fun (Wrap (..), (>*))
-import qualified NodeJS.Sacred as S
+import qualified Node.Sacred as S
 
 -- TYPES
 

@@ -15,7 +15,7 @@ import Data.List (intercalate)
 import Data.Maybe (isJust)
 import Fun ((!>))
 import Pure (Expr (..), Module (..), Statement (..), visibilityFromMaybe)
-import qualified Pure.Source.Sacred as S
+import qualified Pure.Sacred as S
 import Result (Result)
 import qualified Result
 import Text.Parsec

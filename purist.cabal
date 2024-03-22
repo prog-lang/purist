@@ -27,13 +27,13 @@ library
   exposed-modules:
       Convert
       Fun
-      NodeJS.CommonJS
-      NodeJS.Sacred
-      NodeJS.Transpiler
+      Node
+      Node.Sacred
+      Node.Transpiler
       Pure
       Pure.Checks
       Pure.Parser
-      Pure.Source.Sacred
+      Pure.Sacred
       Result
   other-modules:
       Paths_purist
