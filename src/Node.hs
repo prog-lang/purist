@@ -3,11 +3,15 @@
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MonoLocalBinds #-}
 
-module Node (Module (..), Statement (..), Expr (..)) where
+module Node
+  ( Module (..),
+    Statement (..),
+    Expr (..),
+  )
+where
 
-import Data.List (intercalate)
-import Fun (Wrap (..), (>*))
 import qualified Node.Sacred as S
+import Strings (braced, bracketed, commad, parenthesised, (>*))
 
 -- TYPES
 
@@ -31,6 +35,7 @@ data Expr
   | Float Double
   | Str String
   | Id Id
+  | Array [Expr]
   | New Id [Expr]
   | Ternary Expr Expr Expr
   | Call Expr [Expr]
@@ -46,23 +51,15 @@ isTernary _ = False
 -- SHOW
 
 embrace :: Expr -> String
-embrace (Int i) = show i
-embrace (Float f) = show f
-embrace (Str s) = show s
-embrace (Id s) = s
-embrace ex = braced $ show ex
+embrace i@(Int _) = show i
+embrace f@(Float _) = show f
+embrace s@(Str _) = show s
+embrace i@(Id _) = show i
+embrace array@(Array _) = show array
+embrace ex = parenthesised $ show ex
 
 embraceIf :: (Expr -> Bool) -> Expr -> String
 embraceIf check ex = if check ex then embrace ex else show ex
-
-commad :: [String] -> String
-commad = intercalate $ S.comma ++ " "
-
-braced :: String -> String
-braced a = S.lbrace ++ a ++ S.rbrace
-
-bracketed :: String -> String
-bracketed a = S.lbracket ++ a ++ S.rbracket
 
 instance Show Module where
   show :: Module -> String
@@ -75,11 +72,11 @@ instance Show Statement where
   show (Let ident ex) = S.let_ ++ " " ++ ident ++ " " >* S.assign ++ show ex ++ S.semicolon
   show (Assign ident ex) = ident ++ " " >* S.assign ++ show ex ++ S.semicolon
   show (Return ex) = S.return ++ " " ++ show ex ++ S.semicolon
-  show (Exports ids) = S.exports ++ " " >* S.assign ++ bracketed (commad ids)
+  show (Exports ids) = S.exports ++ " " >* S.assign ++ braced (commad ids)
   show (Function name ids ss) = S.function ++ " " ++ name ++ params ++ " " ++ body
     where
-      params = braced $ commad ids
-      body = bracketed $ unwords $ map show ss
+      params = parenthesised $ commad ids
+      body = braced $ unwords $ map show ss
 
 instance Show Expr where
   show :: Expr -> String
@@ -87,7 +84,8 @@ instance Show Expr where
   show (Float n) = show n
   show (Str s) = show s
   show (Id ident) = ident
-  show (New ident exs) = S.new ++ ident ++ braced (commad $ map show exs)
+  show (Array exs) = bracketed $ commad $ map show exs
+  show (New ident exs) = S.new ++ ident ++ parenthesised (commad $ map show exs)
   show (Ternary cond left right) = cond_ ++ question ++ then_ ++ colon ++ else_
     where
       cond_ = show cond
@@ -95,8 +93,8 @@ instance Show Expr where
       else_ = embraceIf isTernary right
       question = " " >* S.question
       colon = " " >* S.colon
-  show (Call ex exs) = embrace ex ++ braced (commad $ map show exs)
+  show (Call ex exs) = embrace ex ++ parenthesised (commad $ map show exs)
   show (Lam ids ss) = S.function ++ params ++ " " ++ body
     where
-      params = braced $ commad ids
-      body = bracketed $ unwords $ map show ss
+      params = parenthesised $ commad ids
+      body = braced $ unwords $ map show ss

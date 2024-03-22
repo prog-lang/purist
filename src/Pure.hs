@@ -12,8 +12,8 @@ module Pure
   )
 where
 
-import Fun (Wrap (..), (>*))
 import qualified Pure.Sacred as S
+import Strings (commad, parenthesised, (>*))
 
 -- TYPES
 
@@ -27,6 +27,7 @@ data Expr
   = Lam String Expr
   | If Expr Expr Expr
   | App Expr [Expr]
+  | List [Expr]
   | Id String
   | Str String
   | Float Double
@@ -57,11 +58,12 @@ isPublic (Def Public _ _) = True
 -- SHOW
 
 embrace :: Expr -> String
-embrace (Int i) = show i
-embrace (Float f) = show f
-embrace (Str s) = show s
-embrace (Id s) = s
-embrace ex = S.str S.lbrace ++ show ex ++ S.str S.rbrace
+embrace i@(Int _) = show i
+embrace f@(Float _) = show f
+embrace s@(Str _) = show s
+embrace i@(Id _) = show i
+embrace l@(List _) = show l
+embrace ex = parenthesised $ show ex
 
 instance Show Module where
   show (Module defs) = unlines $ map show defs
@@ -83,6 +85,7 @@ instance Show Expr where
   show (Float f) = show f
   show (Str s) = show s
   show (Id s) = s
+  show (List l) = "[" ++ commad (map show l) ++ "]"
   show (App ex exs) = unwords $ map embrace (ex : exs)
   show (If x y z) =
     S.if_

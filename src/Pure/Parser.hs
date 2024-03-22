@@ -68,12 +68,11 @@ astP = endBy defP spacesP <* eof <&> Module
 
 defP :: Parser Statement
 defP = do
-  vis <- optionMaybe $ reserved parser S.public
-  _ <- spacesP
-  name <- nameP
-  _ <- spacesP >> reservedOp parser S.walrus >> spacesP
-  expr <- exprP
-  _ <- spacesP >> char S.semicolon
+  vis <- lexeme parser $ optionMaybe $ reserved parser S.public
+  name <- lexeme parser nameP
+  _ <- reservedOp parser S.walrus
+  expr <- lexeme parser exprP
+  _ <- char S.semicolon
   return $ Def (visibilityFromMaybe vis) name expr
 
 exprP :: Parser Expr
@@ -114,6 +113,7 @@ callerP = try parensP <|> try qualifiedP <|> idP
 literalP :: Parser Expr
 literalP =
   try parensP
+    <|> try listP
     <|> try qualifiedP
     <|> try idP
     <|> try strP
@@ -122,6 +122,9 @@ literalP =
 
 parensP :: Parser Expr
 parensP = parens parser exprP
+
+listP :: Parser Expr
+listP = brackets parser $ List <$> commaSep1 parser exprP
 
 qualifiedP :: Parser Expr
 qualifiedP = do

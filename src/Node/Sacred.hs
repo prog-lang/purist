@@ -42,17 +42,23 @@ colon = ":"
 semicolon :: String
 semicolon = ";"
 
-lbrace :: String
-lbrace = "("
+lparen :: String
+lparen = "("
 
-rbrace :: String
-rbrace = ")"
+rparen :: String
+rparen = ")"
 
 lbracket :: String
-lbracket = "{"
+lbracket = "["
 
 rbracket :: String
-rbracket = "}"
+rbracket = "]"
+
+lbrace :: String
+lbrace = "{"
+
+rbrace :: String
+rbrace = "}"
 
 arrow :: String
 arrow = "=>"

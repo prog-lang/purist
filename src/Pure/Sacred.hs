@@ -39,17 +39,20 @@ arrow = "->"
 semicolon :: Char
 semicolon = ';'
 
-lbrace :: Char
-lbrace = '('
+lparen :: String
+lparen = "("
 
-rbrace :: Char
-rbrace = ')'
+rparen :: String
+rparen = ")"
 
 underscore :: Char
 underscore = '_'
 
 dot :: Char
 dot = '.'
+
+comma :: Char
+comma = ','
 
 minus :: Char
 minus = '-'
