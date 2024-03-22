@@ -37,6 +37,7 @@ instance Into Pure.Expr Node.Expr where
   into (Pure.App ex exs) = foldl call (into ex) exs
     where
       call f arg = Node.Call f [into arg]
+  into (Pure.List list) = Node.Array $ map into list
   into (Pure.Id ident) = Node.Id ident
   into (Pure.Str str) = Node.Str str
   into (Pure.Float n) = Node.Float n

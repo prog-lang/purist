@@ -1,22 +1,24 @@
 module Main (main) where
 
 import Convert (Into (..))
-import Fun ((|>))
+import Fun ((!>), (|>))
 import qualified Node
 import Node.Transpiler ()
-import qualified Pure
 import Pure.Checks (duplicateDefinitions)
 import Pure.Parser (parseModule)
-import Result (unwrap, (<!>))
+import Result (Result (..), (<!>))
+import System.IO (hPutStr, stderr)
 
 main :: IO ()
-main = interact with
+main = getContents >>= transpile !> printOut
 
-with :: String -> String
-with input =
+printOut :: (Show a1, Show a2) => Result a1 a2 -> IO ()
+printOut (Ok ok) = print ok
+printOut (Err err) = hPutStr stderr $ show err
+
+transpile :: String -> Result String Node.Module
+transpile input =
   parseModule "main.pure" input
     <!> show
     >>= duplicateDefinitions
-      |> (into :: (Functor f) => f Pure.Module -> f Node.Module)
-      |> (into :: (Functor f) => f Node.Module -> f String)
-      |> unwrap
+      |> into

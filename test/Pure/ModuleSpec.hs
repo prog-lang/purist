@@ -24,6 +24,9 @@ spec = do
       show (Id "main") `shouldBe` "main"
       show (Id "main.main") `shouldBe` "main.main"
 
+    it "shows lists correctly" $ do
+      show (List [Int 1, Id "main", Float 3.14]) `shouldBe` "[1, main, 3.14]"
+
     it "shows applications correctly" $ do
       show (App (Id "f") [Lam "a" $ Id "a", Int 0]) `shouldBe` "f (a -> a) 0"
 

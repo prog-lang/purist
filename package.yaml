@@ -45,7 +45,7 @@ library:
   source-dirs: src
 
 executables:
-  purist-exe:
+  pure:
     main:                Main.hs
     source-dirs:         app
     ghc-options:
