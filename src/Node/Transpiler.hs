@@ -13,6 +13,10 @@ import qualified Pure
 
 type Error = String
 
+instance Into Node.Module String where
+  into :: Node.Module -> String
+  into = show
+
 instance Into Pure.Module Node.Module where
   into :: Pure.Module -> Node.Module
   into modul@(Pure.Module ss) = Node.Module $ map into ss ++ [exports]

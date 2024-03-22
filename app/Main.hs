@@ -7,25 +7,16 @@ import Node.Transpiler ()
 import qualified Pure
 import Pure.Checks (duplicateDefinitions)
 import Pure.Parser (parseModule)
-import Result (Result, unwrap, (<!>))
+import Result (unwrap, (<!>))
 
 main :: IO ()
 main = interact with
 
 with :: String -> String
 with input =
-  show
-    <!> parseModule "main.pure" input
-    |> check
-    |> intoJS
-    |> intoCode
-    |> unwrap
-
-check :: Result String Pure.Module -> Result String Pure.Module
-check = (>>= duplicateDefinitions)
-
-intoJS :: Result String Pure.Module -> Result String Node.Module
-intoJS = fmap into
-
-intoCode :: Result String Node.Module -> Result String String
-intoCode = fmap show
+  parseModule "main.pure" input
+    <!> show
+    >>= duplicateDefinitions
+      |> (into :: (Functor f) => f Pure.Module -> f Node.Module)
+      |> (into :: (Functor f) => f Node.Module -> f String)
+      |> unwrap
