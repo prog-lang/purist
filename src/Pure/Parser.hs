@@ -22,6 +22,7 @@ import Text.Parsec
   ( ParseError,
     SourceName,
     alphaNum,
+    between,
     char,
     endBy,
     eof,
@@ -68,7 +69,7 @@ astP = endBy defP spacesP <* eof <&> Module
 
 defP :: Parser Statement
 defP = do
-  vis <- lexeme parser $ optionMaybe $ reserved parser S.public
+  vis <- lexeme parser $ optionMaybe $ reservedP S.public
   name <- lexeme parser nameP
   _ <- reservedOp parser S.walrus
   expr <- lexeme parser exprP
@@ -80,13 +81,14 @@ exprP = ifP <|> try lambdaP <|> try appP <|> literalP <?> "an expression"
 
 ifP :: Parser Expr
 ifP = do
-  _ <- reserved parser S.if_
-  x <- literalP
-  _ <- reserved parser S.then_
-  y <- literalP
-  _ <- reserved parser S.else_
-  z <- literalP
+  x <- between (reservedP S.if_) (reservedP S.then_) notIfP
+  y <- notIfP <* reservedP S.else_
+  z <- exprP
   return $ If x y z
+
+-- | Any expression except `if` unless it's parenthesised.
+notIfP :: Parser Expr
+notIfP = try lambdaP <|> try appP <|> literalP <?> "a condition"
 
 lambdaP :: Parser Expr
 lambdaP = do
@@ -145,6 +147,9 @@ floatP = do
 
 intP :: Parser Expr
 intP = Int <$> integer parser
+
+reservedP :: String -> Parser ()
+reservedP = reserved parser
 
 nameP :: Parser String
 nameP = identifier parser

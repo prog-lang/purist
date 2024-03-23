@@ -89,10 +89,10 @@ instance Show Expr where
   show (App ex exs) = unwords $ map embrace (ex : exs)
   show (If x y z) =
     S.if_
-      ++ " " >* embrace x
+      ++ " " >* show x
       ++ S.then_
-      ++ " " >* embrace y
+      ++ " " >* show y
       ++ S.else_
       ++ " "
-      ++ embrace z
+      ++ show z
   show (Lam p ex) = p ++ " " >* S.arrow ++ show ex

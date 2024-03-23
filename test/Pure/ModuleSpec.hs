@@ -31,10 +31,10 @@ spec = do
       show (App (Id "f") [Lam "a" $ Id "a", Int 0]) `shouldBe` "f (a -> a) 0"
 
     it "shows ifs correctly" $ do
-      show iff `shouldBe` "if True then (if False then 0 else 1) else 42"
+      show iff `shouldBe` "if f x then if False then 0 else 1 else 42"
 
     it "shows lambdas correctly" $ do
       show (Lam "a" $ Lam "b" $ Id "a") `shouldBe` "a -> b -> a"
   where
-    iff = If (Id "True") if' (Int 42)
+    iff = If (App (Id "f") [Id "x"]) if' (Int 42)
     if' = If (Id "False") (Int 0) (Int 1)
