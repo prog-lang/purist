@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# OPTIONS_GHC -Wno-missing-export-lists #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
@@ -9,29 +8,25 @@ module Node.Transpiler where
 
 import Convert (Into (..))
 import qualified Node
+import Pure (Definition ((:=)))
 import qualified Pure
 
 type Error = String
 
 instance Into Node.Module String where
-  into :: Node.Module -> String
   into = show
 
 instance Into Pure.Module Node.Module where
-  into :: Pure.Module -> Node.Module
-  into modul@(Pure.Module ss) = Node.Module $ map into ss ++ [exports]
-    where
-      exports = Node.Exports $ Pure.public modul
+  into modul =
+    Node.Module $
+      map into (Pure.definitions modul)
+        ++ [Node.Exports $ Pure.exports modul]
 
-instance Into Pure.Statement Node.Statement where
-  into :: Pure.Statement -> Node.Statement
-  into (Pure.Def _ name (Pure.Lam param ex)) = Node.Function name [param] body
-    where
-      body = [Node.Return $ into ex]
-  into (Pure.Def _ ident expr) = Node.Const ident $ into expr
+instance Into Pure.Definition Node.Statement where
+  into (name := (Pure.Lam param expr)) = Node.Function name [param] [Node.Return $ into expr]
+  into (name := expr) = Node.Const name $ into expr
 
 instance Into Pure.Expr Node.Expr where
-  into :: Pure.Expr -> Node.Expr
   into (Pure.Lam param body) = Node.Lam [param] [Node.Return $ into body]
   into (Pure.If b l r) = Node.Ternary (into b) (into l) (into r)
   into (Pure.App ex exs) = foldl call (into ex) exs

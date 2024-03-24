@@ -11,10 +11,10 @@ isKeyword :: String -> Bool
 isKeyword = flip List.elem keywords
 
 keywords :: [String]
-keywords = [public, if_, then_, else_]
+keywords = [export, if_, then_, else_]
 
-public :: String
-public = "public"
+export :: String
+export = "export"
 
 if_ :: String
 if_ = "if"
@@ -44,6 +44,12 @@ lparen = "("
 
 rparen :: String
 rparen = ")"
+
+lbracket :: String
+lbracket = "["
+
+rbracket :: String
+rbracket = "]"
 
 underscore :: Char
 underscore = '_'

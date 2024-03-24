@@ -2,58 +2,46 @@
 
 module Pure
   ( Module (..),
+    Id,
     moduleNames,
-    public,
-    Statement (..),
+    Definition (..),
     defName,
-    Visibility (..),
-    visibilityFromMaybe,
     Expr (..),
   )
 where
 
 import qualified Pure.Sacred as S
-import Strings (commad, parenthesised, (>*))
+import Strings (bracketed, commad, parenthesised, (+-+))
 
 -- TYPES
 
-newtype Module = Module [Statement]
+data Module = Module
+  { definitions :: [Definition],
+    exports :: [Id]
+  }
 
-data Statement = Def Visibility String Expr
+data Definition = Id := Expr
 
-data Visibility = Private | Public deriving (Eq)
+type Id = String
 
 data Expr
-  = Lam String Expr
+  = Lam Id Expr
   | If Expr Expr Expr
   | App Expr [Expr]
   | List [Expr]
-  | Id String
+  | Id Id
   | Str String
   | Float Double
   | Int Integer
   deriving (Eq)
 
--- CONSTRUCT
-
-visibilityFromMaybe :: Maybe a -> Visibility
-visibilityFromMaybe (Just _) = Public
-visibilityFromMaybe _ = Private
-
 -- INSPECT
 
-moduleNames :: Module -> [String]
-moduleNames (Module ss) = map defName ss
+moduleNames :: Module -> [Id]
+moduleNames (Module defs _) = map defName defs
 
-public :: Module -> [String]
-public (Module ss) = map defName $ filter isPublic ss
-
-defName :: Statement -> String
-defName (Def _ nom _) = nom
-
-isPublic :: Statement -> Bool
-isPublic (Def Private _ _) = False
-isPublic (Def Public _ _) = True
+defName :: Definition -> Id
+defName (name := _) = name
 
 -- SHOW
 
@@ -66,33 +54,19 @@ embrace l@(List _) = show l
 embrace ex = parenthesised $ show ex
 
 instance Show Module where
-  show (Module defs) = unlines $ map show defs
+  show (Module defs es) = unlines $ export : map show defs
+    where
+      export = S.export +-+ parenthesised (commad es) ++ S.str S.semicolon
 
-instance Show Statement where
-  show (Def vis name expr) =
-    show vis
-      ++ name
-      ++ " " >* S.walrus
-      ++ show expr
-      ++ S.str S.semicolon
-
-instance Show Visibility where
-  show Private = ""
-  show Public = S.public ++ " "
+instance Show Definition where
+  show (name := expr) = name +-+ S.walrus +-+ show expr ++ S.str S.semicolon
 
 instance Show Expr where
   show (Int i) = show i
   show (Float f) = show f
   show (Str s) = show s
   show (Id s) = s
-  show (List l) = "[" ++ commad (map show l) ++ "]"
+  show (List l) = bracketed $ commad (map show l)
   show (App ex exs) = unwords $ map embrace (ex : exs)
-  show (If x y z) =
-    S.if_
-      ++ " " >* show x
-      ++ S.then_
-      ++ " " >* show y
-      ++ S.else_
-      ++ " "
-      ++ show z
-  show (Lam p ex) = p ++ " " >* S.arrow ++ show ex
+  show (If x y z) = S.if_ +-+ show x +-+ S.then_ +-+ show y +-+ S.else_ +-+ show z
+  show (Lam p ex) = p +-+ S.arrow +-+ show ex

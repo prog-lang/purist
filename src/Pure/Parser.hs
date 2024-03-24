@@ -10,14 +10,14 @@ SOME DOCS:
 
 module Pure.Parser (parseModule) where
 
-import Data.Functor ((<&>))
 import Data.List (intercalate)
-import Data.Maybe (isJust)
+import Data.Maybe (isJust, mapMaybe)
 import Fun ((!>))
-import Pure (Expr (..), Module (..), Statement (..), visibilityFromMaybe)
+import Pure (Definition (..), Expr (..), Id, Module (..))
 import qualified Pure.Sacred as S
 import Result (Result)
 import qualified Result
+import Strings (commad, parenthesised, (+-+))
 import Text.Parsec
   ( ParseError,
     SourceName,
@@ -29,6 +29,7 @@ import Text.Parsec
     oneOf,
     optionMaybe,
     parse,
+    sepBy,
     sepBy1,
     try,
     (<?>),
@@ -41,6 +42,30 @@ import Text.Parsec.Token
     GenTokenParser (..),
     makeTokenParser,
   )
+
+-- STATEMENT
+
+data Statement = Export [Id] | Def Definition
+
+unwrapExports :: Statement -> [Id]
+unwrapExports (Export ids) = ids
+unwrapExports _ = []
+
+allExports :: [Statement] -> [Id]
+allExports = concat . map unwrapExports
+
+toDefinition :: Statement -> Maybe Definition
+toDefinition (Def def) = Just def
+toDefinition _ = Nothing
+
+allDefinitions :: [Statement] -> [Definition]
+allDefinitions = mapMaybe toDefinition
+
+instance Show Statement where
+  show (Export ids) = S.export +-+ parenthesised (commad ids) ++ S.str S.semicolon
+  show (Def def) = show def
+
+-- PARSER
 
 language :: (Monad m) => GenLanguageDef String u m
 language =
@@ -62,19 +87,32 @@ parser :: (Monad m) => GenTokenParser String u m
 parser = makeTokenParser language
 
 parseModule :: SourceName -> String -> Result ParseError Module
-parseModule sourceName = parse astP sourceName !> Result.fromEither
+parseModule sourceName = parse moduleP sourceName !> Result.fromEither
 
-astP :: Parser Module
-astP = endBy defP spacesP <* eof <&> Module
+moduleP :: Parser Module
+moduleP = do
+  ss <- statementsP
+  return $ Module (allDefinitions ss) (allExports ss)
 
-defP :: Parser Statement
+statementsP :: Parser [Statement]
+statementsP = endBy statementP spacesP <* eof
+
+statementP :: Parser Statement
+statementP = options <* lexemeP (char S.semicolon)
+  where
+    options = try (Export <$> exportP) <|> Def <$> defP
+
+exportP :: Parser [Id]
+exportP = do
+  _ <- reservedP S.export
+  parensP $ sepBy nameP $ lexemeP $ char S.comma
+
+defP :: Parser Definition
 defP = do
-  vis <- lexeme parser $ optionMaybe $ reservedP S.public
-  name <- lexeme parser nameP
+  name <- lexemeP nameP
   _ <- reservedOp parser S.walrus
-  expr <- lexeme parser exprP
-  _ <- char S.semicolon
-  return $ Def (visibilityFromMaybe vis) name expr
+  expr <- lexemeP exprP
+  return $ name := expr
 
 exprP :: Parser Expr
 exprP = ifP <|> try lambdaP <|> try appP <|> literalP <?> "an expression"
@@ -110,20 +148,17 @@ appP = do
   return $ App f args
 
 callerP :: Parser Expr
-callerP = try parensP <|> try qualifiedP <|> idP
+callerP = try (parensP exprP) <|> try qualifiedP <|> idP
 
 literalP :: Parser Expr
 literalP =
-  try parensP
+  try (parensP exprP)
     <|> try listP
     <|> try qualifiedP
     <|> try idP
     <|> try strP
     <|> try floatP
     <|> try intP
-
-parensP :: Parser Expr
-parensP = parens parser exprP
 
 listP :: Parser Expr
 listP = brackets parser $ List <$> commaSep1 parser exprP
@@ -151,8 +186,14 @@ intP = Int <$> integer parser
 reservedP :: String -> Parser ()
 reservedP = reserved parser
 
-nameP :: Parser String
+nameP :: Parser Id
 nameP = identifier parser
+
+lexemeP :: Parser a -> Parser a
+lexemeP = lexeme parser
 
 spacesP :: Parser ()
 spacesP = whiteSpace parser
+
+parensP :: Parser a -> Parser a
+parensP = parens parser
