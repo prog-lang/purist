@@ -4,6 +4,7 @@ module Strings
     braced,
     bracketed,
     (>*),
+    (+-+),
   )
 where
 
@@ -13,6 +14,11 @@ infixl 6 >*
 
 (>*) :: String -> String -> String
 wrapper >* target = wrapper ++ target ++ wrapper
+
+infixr 5 +-+
+
+(+-+) :: String -> String -> String
+x +-+ y = x ++ " " ++ y
 
 commad :: [String] -> String
 commad = intercalate ", "
