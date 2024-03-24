@@ -3,3 +3,11 @@ first := x -> _ -> x;
 second := _ -> y -> y;
 flip := f -> y -> x -> f x y;
 compose := f -> g -> x -> g (f x);
+
+export (
+  id,
+  first,
+  second,
+  flip,
+  compose
+);
