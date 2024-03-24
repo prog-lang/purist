@@ -11,7 +11,7 @@ module Pure
 where
 
 import qualified Pure.Sacred as S
-import Strings (bracketed, commad, parenthesised, (+-+))
+import Strings (list, parenthesised, tuple, (+-+))
 
 -- TYPES
 
@@ -56,7 +56,7 @@ embrace ex = parenthesised $ show ex
 instance Show Module where
   show (Module defs es) = unlines $ export : map show defs
     where
-      export = S.export +-+ parenthesised (commad es) ++ S.str S.semicolon
+      export = S.export +-+ tuple es ++ S.str S.semicolon
 
 instance Show Definition where
   show (name := expr) = name +-+ S.walrus +-+ show expr ++ S.str S.semicolon
@@ -66,7 +66,7 @@ instance Show Expr where
   show (Float f) = show f
   show (Str s) = show s
   show (Id s) = s
-  show (List l) = bracketed $ commad (map show l)
+  show (List l) = list (map show l)
   show (App ex exs) = unwords $ map embrace (ex : exs)
   show (If x y z) = S.if_ +-+ show x +-+ S.then_ +-+ show y +-+ S.else_ +-+ show z
   show (Lam p ex) = p +-+ S.arrow +-+ show ex

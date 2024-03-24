@@ -11,11 +11,10 @@ module Node
 where
 
 import qualified Node.Sacred as S
-import Strings (braced, bracketed, commad, parenthesised, (>*))
+import Strings (array, braced, list, parenthesised, tuple, (+-+))
 
 -- TYPES
 
--- | Any valid CommonJS identifier
 type Id = String
 
 newtype Module = Module [Statement]
@@ -55,7 +54,7 @@ embrace i@(Int _) = show i
 embrace f@(Float _) = show f
 embrace s@(Str _) = show s
 embrace i@(Id _) = show i
-embrace array@(Array _) = show array
+embrace arr@(Array _) = show arr
 embrace ex = parenthesised $ show ex
 
 embraceIf :: (Expr -> Bool) -> Expr -> String
@@ -67,15 +66,15 @@ instance Show Module where
 
 instance Show Statement where
   show :: Statement -> String
-  show (Const ident ex) = S.const ++ " " ++ ident ++ " " >* S.assign ++ show ex ++ S.semicolon
-  show (Var ident ex) = S.var ++ " " ++ ident ++ " " >* S.assign ++ show ex ++ S.semicolon
-  show (Let ident ex) = S.let_ ++ " " ++ ident ++ " " >* S.assign ++ show ex ++ S.semicolon
-  show (Assign ident ex) = ident ++ " " >* S.assign ++ show ex ++ S.semicolon
-  show (Return ex) = S.return ++ " " ++ show ex ++ S.semicolon
-  show (Exports ids) = S.exports ++ " " >* S.assign ++ braced (commad ids)
-  show (Function name ids ss) = S.function ++ " " ++ name ++ params ++ " " ++ body
+  show (Const ident ex) = S.const +-+ ident +-+ S.assign +-+ show ex ++ S.semicolon
+  show (Var ident ex) = S.var +-+ ident +-+ S.assign +-+ show ex ++ S.semicolon
+  show (Let ident ex) = S.let_ +-+ ident +-+ S.assign +-+ show ex ++ S.semicolon
+  show (Assign ident ex) = ident +-+ S.assign +-+ show ex ++ S.semicolon
+  show (Return ex) = S.return +-+ show ex ++ S.semicolon
+  show (Exports ids) = S.exports +-+ S.assign +-+ array ids
+  show (Function name ids ss) = S.function +-+ name ++ params +-+ body
     where
-      params = parenthesised $ commad ids
+      params = tuple ids
       body = braced $ unwords $ map show ss
 
 instance Show Expr where
@@ -84,17 +83,15 @@ instance Show Expr where
   show (Float n) = show n
   show (Str s) = show s
   show (Id ident) = ident
-  show (Array exs) = bracketed $ commad $ map show exs
-  show (New ident exs) = S.new ++ ident ++ parenthesised (commad $ map show exs)
-  show (Ternary cond left right) = cond_ ++ question ++ then_ ++ colon ++ else_
+  show (Array exs) = list $ map show exs
+  show (New ident exs) = S.new ++ ident ++ tuple (map show exs)
+  show (Ternary q l r) = cond_ +-+ S.question +-+ then_ +-+ S.colon +-+ else_
     where
-      cond_ = show cond
-      then_ = embraceIf isTernary left
-      else_ = embraceIf isTernary right
-      question = " " >* S.question
-      colon = " " >* S.colon
-  show (Call ex exs) = embrace ex ++ parenthesised (commad $ map show exs)
-  show (Lam ids ss) = S.function ++ params ++ " " ++ body
+      cond_ = show q
+      then_ = embraceIf isTernary l
+      else_ = embraceIf isTernary r
+  show (Call ex exs) = embrace ex ++ tuple (map show exs)
+  show (Lam ids ss) = S.function ++ params +-+ body
     where
-      params = parenthesised $ commad ids
+      params = tuple ids
       body = braced $ unwords $ map show ss

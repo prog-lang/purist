@@ -3,6 +3,9 @@ module Strings
     parenthesised,
     braced,
     bracketed,
+    array,
+    tuple,
+    list,
     (>*),
     (+-+),
   )
@@ -31,3 +34,12 @@ braced a = "{" ++ a ++ "}"
 
 bracketed :: String -> String
 bracketed a = "[" ++ a ++ "]"
+
+tuple :: [String] -> String
+tuple = parenthesised . commad
+
+array :: [String] -> String
+array = braced . commad
+
+list :: [String] -> String
+list = bracketed . commad
