@@ -3,11 +3,15 @@ module Strings
     parenthesised,
     braced,
     bracketed,
+    tab,
+    ul,
     array,
     tuple,
     list,
     (>*),
     (+-+),
+    (+\+),
+    (+\\+),
   )
 where
 
@@ -22,6 +26,16 @@ infixr 5 +-+
 
 (+-+) :: String -> String -> String
 x +-+ y = x ++ " " ++ y
+
+infixr 5 +\+
+
+(+\+) :: String -> String -> String
+x +\+ y = x ++ "\n" ++ y
+
+infixr 5 +\\+
+
+(+\\+) :: String -> String -> String
+x +\\+ y = x ++ "\n\n" ++ y
 
 commad :: [String] -> String
 commad = intercalate ", "
@@ -43,3 +57,12 @@ array = braced . commad
 
 list :: [String] -> String
 list = bracketed . commad
+
+tab :: String
+tab = replicate 4 ' '
+
+ul :: [String] -> String
+ul = unlines . map li
+
+li :: String -> String
+li = (tab ++)

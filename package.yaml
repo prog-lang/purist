@@ -29,6 +29,7 @@ dependencies:
 - text >= 2.0.2
 - hspec >= 2.11.7
 - QuickCheck >= 2.14.3
+- containers >= 0.6.7
 
 ghc-options:
 - -Wall

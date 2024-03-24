@@ -1,20 +1,41 @@
 module Main (main) where
 
+import CLI (Application, Command (..), application, runIO)
 import Convert (Into (..))
+import Data.Version (showVersion)
 import Fun ((!>), (|>))
 import qualified Node
 import Node.Transpiler ()
+import Paths_purist (version)
 import Pure.Checks (duplicateDefinitions)
 import Pure.Parser (parseModule)
 import Result (Result (..), (<!>))
-import System.IO (hPutStr, stderr)
+import System.IO (hPutStrLn, stderr)
 
 main :: IO ()
-main = getContents >>= transpile !> printOut
+main = runIO app
 
-printOut :: (Show a1, Show a2) => Result a1 a2 -> IO ()
+app :: Application
+app =
+  application
+    "pure"
+    (showVersion version)
+    "Development suite for the Pure programming language"
+    ["Viktor A. Rozenko Voitenko <sharp.vik@gmail.com>"]
+    [ Command
+        { longName = "compile",
+          shortName = Just 'c',
+          description = "Compile a single module",
+          action = const compile
+        }
+    ]
+
+compile :: IO ()
+compile = getContents >>= transpile !> printOut
+
+printOut :: (Show a) => Result String a -> IO ()
 printOut (Ok ok) = print ok
-printOut (Err err) = hPutStr stderr $ show err
+printOut (Err err) = hPutStrLn stderr err
 
 transpile :: String -> Result String Node.Module
 transpile input =
