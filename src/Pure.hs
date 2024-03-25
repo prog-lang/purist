@@ -33,6 +33,7 @@ data Expr
   | Str String
   | Float Double
   | Int Integer
+  | Bool Bool
   deriving (Eq)
 
 -- INSPECT
@@ -62,10 +63,11 @@ instance Show Definition where
   show (name := expr) = name +-+ S.walrus +-+ show expr ++ S.str S.semicolon
 
 instance Show Expr where
-  show (Int i) = show i
-  show (Float f) = show f
-  show (Str s) = show s
-  show (Id s) = s
+  show (Bool bool) = show bool
+  show (Int int) = show int
+  show (Float number) = show number
+  show (Str str) = show str
+  show (Id ident) = ident
   show (List l) = list (map show l)
   show (App ex exs) = unwords $ map embrace (ex : exs)
   show (If x y z) = S.if_ +-+ show x +-+ S.then_ +-+ show y +-+ S.else_ +-+ show z

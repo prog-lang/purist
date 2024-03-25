@@ -25,6 +25,12 @@ then_ = "then"
 else_ :: String
 else_ = "else"
 
+true :: String
+true = show True
+
+false :: String
+false = show False
+
 -- SIGNS
 
 operators :: [String]

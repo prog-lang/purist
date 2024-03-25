@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE MonoLocalBinds #-}
 
 module Node
@@ -30,7 +29,8 @@ data Statement
   deriving (Eq)
 
 data Expr
-  = Int Integer
+  = Bool Bool
+  | Int Integer
   | Float Double
   | Str String
   | Id Id
@@ -61,11 +61,9 @@ embraceIf :: (Expr -> Bool) -> Expr -> String
 embraceIf check ex = if check ex then embrace ex else show ex
 
 instance Show Module where
-  show :: Module -> String
   show (Module ss) = unlines $ map show ss
 
 instance Show Statement where
-  show :: Statement -> String
   show (Const ident ex) = S.const +-+ ident +-+ S.assign +-+ show ex ++ S.semicolon
   show (Var ident ex) = S.var +-+ ident +-+ S.assign +-+ show ex ++ S.semicolon
   show (Let ident ex) = S.let_ +-+ ident +-+ S.assign +-+ show ex ++ S.semicolon
@@ -78,7 +76,7 @@ instance Show Statement where
       body = braced $ unwords $ map show ss
 
 instance Show Expr where
-  show :: Expr -> String
+  show (Bool bool) = if bool then S.true else S.false
   show (Int i) = show i
   show (Float n) = show n
   show (Str s) = show s
