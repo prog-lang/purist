@@ -10,7 +10,7 @@ module Node
 where
 
 import qualified Node.Sacred as S
-import Strings (array, braced, list, parenthesised, tuple, (+-+))
+import Strings (array, braced, commad, list, parenthesised, tuple, (+-+))
 
 -- TYPES
 
@@ -35,6 +35,7 @@ data Expr
   | Str String
   | Id Id
   | Array [Expr]
+  | Object [(String, Expr)]
   | New Id [Expr]
   | Ternary Expr Expr Expr
   | Call Expr [Expr]
@@ -82,6 +83,7 @@ instance Show Expr where
   show (Str s) = show s
   show (Id ident) = ident
   show (Array exs) = list $ map show exs
+  show (Object kvs) = braced $ commad $ map (\(k, v) -> k ++ S.colon +-+ show v) kvs
   show (New ident exs) = S.new ++ ident ++ tuple (map show exs)
   show (Ternary q l r) = cond_ +-+ S.question +-+ then_ +-+ S.colon +-+ else_
     where

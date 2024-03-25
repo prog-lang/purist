@@ -11,7 +11,15 @@ module Pure
 where
 
 import qualified Pure.Sacred as S
-import Strings (list, parenthesised, tuple, (+-+))
+import Strings
+  ( Parens (..),
+    list,
+    parenthesised,
+    tuple,
+    (+-+),
+    (+\+),
+  )
+import Type (Type (..))
 
 -- TYPES
 
@@ -20,7 +28,9 @@ data Module = Module
     exports :: [Id]
   }
 
-data Definition = Id := Expr
+data Definition
+  = Id := Expr -- main := 42;
+  | TypeDef Id [Id] [Type] -- type Maybe a is | Just a | Nothing;
 
 type Id = String
 
@@ -43,16 +53,9 @@ moduleNames (Module defs _) = map defName defs
 
 defName :: Definition -> Id
 defName (name := _) = name
+defName (TypeDef name _ _) = name
 
 -- SHOW
-
-embrace :: Expr -> String
-embrace i@(Int _) = show i
-embrace f@(Float _) = show f
-embrace s@(Str _) = show s
-embrace i@(Id _) = show i
-embrace l@(List _) = show l
-embrace ex = parenthesised $ show ex
 
 instance Show Module where
   show (Module defs es) = unlines $ export : map show defs
@@ -61,6 +64,13 @@ instance Show Module where
 
 instance Show Definition where
   show (name := expr) = name +-+ S.walrus +-+ show expr ++ S.str S.semicolon
+  show (TypeDef name poly cons) =
+    S.type_
+      +-+ name
+      +-+ unwords poly
+      +-+ S.is
+      +\+ unlines (map ((S.str S.bar +-+) . show) cons)
+      ++ S.str S.semicolon
 
 instance Show Expr where
   show (Bool bool) = show bool
@@ -69,6 +79,16 @@ instance Show Expr where
   show (Str str) = show str
   show (Id ident) = ident
   show (List l) = list (map show l)
-  show (App ex exs) = unwords $ map embrace (ex : exs)
+  show (App ex exs) = unwords $ map parens (ex : exs)
   show (If x y z) = S.if_ +-+ show x +-+ S.then_ +-+ show y +-+ S.else_ +-+ show z
   show (Lam p ex) = p +-+ S.arrow +-+ show ex
+
+-- PARENS
+
+instance Parens Expr where
+  parens i@(Int _) = show i
+  parens f@(Float _) = show f
+  parens s@(Str _) = show s
+  parens i@(Id _) = show i
+  parens l@(List _) = show l
+  parens ex = parenthesised $ show ex

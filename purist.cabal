@@ -37,6 +37,7 @@ library
       Pure.Sacred
       Result
       Strings
+      Type
   other-modules:
       Paths_purist
   autogen-modules:

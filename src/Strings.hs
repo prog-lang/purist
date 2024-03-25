@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -Wno-type-defaults #-}
+
 module Strings
   ( commad,
     parenthesised,
@@ -8,14 +10,22 @@ module Strings
     array,
     tuple,
     list,
+    numbered,
+    trimSpaces,
     (>*),
     (+-+),
     (+\+),
     (+\\+),
+    Parens (..),
   )
 where
 
+import Data.Char (isSpace)
 import Data.List (intercalate)
+import Fun ((!>))
+
+class Parens a where
+  parens :: a -> String
 
 infixl 6 >*
 
@@ -66,3 +76,9 @@ ul = unlines . map li
 
 li :: String -> String
 li = (tab ++)
+
+trimSpaces :: String -> String
+trimSpaces = reverse . dropWhile isSpace . reverse
+
+numbered :: [a] -> [String]
+numbered = length !> flip take [1 ..] !> map show !> map ("_" ++)
