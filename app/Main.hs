@@ -18,7 +18,7 @@ main = runIO app
 app :: Application
 app =
   application
-    "pure"
+    "purist"
     (showVersion version)
     "Development suite for the Pure programming language"
     ["Viktor A. Rozenko Voitenko <sharp.vik@gmail.com>"]

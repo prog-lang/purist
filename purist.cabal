@@ -57,7 +57,7 @@ library
     , unordered-containers >=0.2.20
   default-language: Haskell2010
 
-executable pure
+executable purist
   main-is: Main.hs
   other-modules:
       Paths_purist
