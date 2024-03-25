@@ -7,9 +7,12 @@
 module Node.Transpiler where
 
 import Convert (Into (..))
+import Data.List (singleton)
 import qualified Node
 import Pure (Definition ((:=)))
 import qualified Pure
+import Strings (numbered)
+import qualified Type as Pure
 
 type Error = String
 
@@ -19,12 +22,26 @@ instance Into Node.Module String where
 instance Into Pure.Module Node.Module where
   into modul =
     Node.Module $
-      map into (Pure.definitions modul)
+      concatMap into (Pure.definitions modul)
         ++ [Node.Exports $ Pure.exports modul]
 
-instance Into Pure.Definition Node.Statement where
-  into (name := (Pure.Lam param expr)) = Node.Function name [param] [Node.Return $ into expr]
-  into (name := expr) = Node.Const name $ into expr
+-- Pure.TypeDefs map to multiple Node.Statements
+instance Into Pure.Definition [Node.Statement] where
+  into (name := (Pure.Lam param expr)) = singleton $ Node.Function name [param] [Node.Return $ into expr]
+  into (name := expr) = singleton $ Node.Const name $ into expr
+  into (Pure.TypeDef ty _ opts) = map typeConsStatement opts
+    where
+      typeConsStatement opt@(Pure.Type tag _) = Node.Const tag $ typeCons opt
+      typeCons (Pure.Type tag args) = foldr lam object params
+        where
+          params = numbered args
+          lam param expr = Node.Lam [param] [Node.Return expr]
+          object =
+            Node.Object
+              [ ("type", Node.Str ty),
+                ("tag", Node.Str tag),
+                ("args", Node.Array $ map Node.Id params)
+              ]
 
 instance Into Pure.Expr Node.Expr where
   into (Pure.Lam param body) = Node.Lam [param] [Node.Return $ into body]

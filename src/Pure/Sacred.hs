@@ -11,7 +11,7 @@ isKeyword :: String -> Bool
 isKeyword = flip List.elem keywords
 
 keywords :: [String]
-keywords = [export, if_, then_, else_]
+keywords = [export, if_, then_, else_, type_, is]
 
 export :: String
 export = "export"
@@ -24,6 +24,12 @@ then_ = "then"
 
 else_ :: String
 else_ = "else"
+
+type_ :: String
+type_ = "type"
+
+is :: String
+is = "is"
 
 true :: String
 true = show True
@@ -68,6 +74,9 @@ comma = ','
 
 minus :: Char
 minus = '-'
+
+bar :: Char
+bar = '|'
 
 -- UTILS
 
