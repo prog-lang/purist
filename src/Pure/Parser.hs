@@ -10,6 +10,7 @@ SOME DOCS:
 
 module Pure.Parser (parseModule) where
 
+import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Maybe (isJust, mapMaybe)
 import Fun ((!>))
@@ -103,9 +104,7 @@ statementP = options <* lexemeP (char S.semicolon)
     options = try (Export <$> exportP) <|> Def <$> defP
 
 exportP :: Parser [Id]
-exportP = do
-  _ <- reservedP S.export
-  parensP $ sepBy nameP $ lexemeP $ char S.comma
+exportP = reservedP S.export *> parensP (sepBy nameP $ lexemeP $ char S.comma)
 
 defP :: Parser Definition
 defP = do
@@ -130,15 +129,12 @@ notIfP = try lambdaP <|> try appP <|> literalP <?> "a condition"
 
 lambdaP :: Parser Expr
 lambdaP = do
-  p <- param <?> "a named parameter"
+  p <- paramP <?> "a named parameter"
   expr <- exprP
   return $ Lam p expr
   where
-    param :: Parser String
-    param = do
-      n <- nameP
-      _ <- spacesP >> reservedOp parser S.arrow >> spacesP
-      return n
+    paramP :: Parser String
+    paramP = nameP <* reservedOp parser S.arrow
 
 appP :: Parser Expr
 appP = do
@@ -154,19 +150,18 @@ literalP :: Parser Expr
 literalP =
   try (parensP exprP)
     <|> try listP
+    <|> try boolP
     <|> try qualifiedP
     <|> try idP
     <|> try strP
     <|> try floatP
-    <|> try intP
+    <|> intP
 
 listP :: Parser Expr
 listP = brackets parser $ List <$> commaSep1 parser exprP
 
 qualifiedP :: Parser Expr
-qualifiedP = do
-  parts <- sepBy1 nameP (char S.dot)
-  return $ Id $ intercalate (S.str S.dot) parts
+qualifiedP = sepBy1 nameP (char S.dot) <&> intercalate (S.str S.dot) !> Id
 
 idP :: Parser Expr
 idP = Id <$> nameP
@@ -183,6 +178,9 @@ floatP = do
 intP :: Parser Expr
 intP = Int <$> integer parser
 
+boolP :: Parser Expr
+boolP = (symbolP S.true <|> symbolP S.false) <&> read !> Bool
+
 reservedP :: String -> Parser ()
 reservedP = reserved parser
 
@@ -197,3 +195,6 @@ spacesP = whiteSpace parser
 
 parensP :: Parser a -> Parser a
 parensP = parens parser
+
+symbolP :: String -> Parser String
+symbolP = symbol parser

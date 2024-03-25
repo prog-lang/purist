@@ -22,6 +22,12 @@ return = "return"
 function :: String
 function = "function"
 
+true :: String
+true = "true"
+
+false :: String
+false = "false"
+
 exports :: String
 exports = "module.exports"
 

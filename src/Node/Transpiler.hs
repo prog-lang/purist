@@ -35,5 +35,6 @@ instance Into Pure.Expr Node.Expr where
   into (Pure.List list) = Node.Array $ map into list
   into (Pure.Id ident) = Node.Id ident
   into (Pure.Str str) = Node.Str str
-  into (Pure.Float n) = Node.Float n
-  into (Pure.Int i) = Node.Int i
+  into (Pure.Float number) = Node.Float number
+  into (Pure.Int int) = Node.Int int
+  into (Pure.Bool bool) = Node.Bool bool
