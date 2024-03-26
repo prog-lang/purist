@@ -27,6 +27,7 @@ import Text.Parsec
     char,
     endBy,
     eof,
+    many,
     oneOf,
     optionMaybe,
     parse,
@@ -43,6 +44,7 @@ import Text.Parsec.Token
     GenTokenParser (..),
     makeTokenParser,
   )
+import Type (Type (..))
 
 -- STATEMENT
 
@@ -99,16 +101,37 @@ statementsP :: Parser [Statement]
 statementsP = endBy statementP spacesP <* eof
 
 statementP :: Parser Statement
-statementP = options <* lexemeP (char S.semicolon)
-  where
-    options = try (Export <$> exportP) <|> Def <$> defP
+statementP = (try exportP <|> definitionP) <* lexemeP (char S.semicolon)
 
-exportP :: Parser [Id]
-exportP = reservedP S.export *> parensP (sepBy nameP $ lexemeP $ char S.comma)
+exportP :: Parser Statement
+exportP = Export <$> (reservedP S.export *> parensP (sepBy nameP $ lexemeP $ char S.comma))
+
+definitionP :: Parser Statement
+definitionP = Def <$> (typeDefP <|> defP)
+
+typeDefP :: Parser Definition
+typeDefP = do
+  _ <- reservedP S.type_
+  name <- nameP
+  params <- many nameP
+  _ <- reservedP S.is >> barP
+  cons <- sepBy1 typeP barP
+  return $ TypeDef name params cons
+  where
+    barP = reservedOp parser [S.bar]
+
+typeP :: Parser Type
+typeP = do
+  tag <- nameP
+  params <- many typeParamP
+  return $ Type tag params
+
+typeParamP :: Parser Type
+typeParamP = try (parensP typeP) <|> (nameP <&> flip Type [])
 
 defP :: Parser Definition
 defP = do
-  name <- lexemeP nameP
+  name <- nameP
   _ <- reservedOp parser S.walrus
   expr <- lexemeP exprP
   return $ name := expr
