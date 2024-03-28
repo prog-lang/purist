@@ -70,15 +70,21 @@ it to get acquainted with its capabilities.
 All great projects started somewhere and Pure isn't an exception to this rule.
 We are working hard to give you a tool you can be excited about.
 
+### Progress
+
+- [x] [Parser](./src/Pure/Parser.hs)
+- [x] [Module (AST)](./src/Pure.hs)
+- [ ] Type Checker with Inference
+- [ ] [Transpiler $\to$ Node.js](./src/Node/Transpiler.hs)
+- [ ] Transpiler $\to$ Go
+
+### Vision
+
 > Our vision is simple: we want backend development to feel like a game.
 
 With a strict but flexible type system and a powerful set of dev tools, all you
 have to do is use compiler hints to make the puzzle pieces fit together. If you
 ever touched Elm or Haskell, you will know what I'm on about.
-
-If you wish to help out, please reach out via my [personal email][email].
-
-[email]: mailto:sharp.vik@gmail.com
 
 ## Research 👩‍🔬
 
@@ -93,3 +99,9 @@ If you wish to help out, please reach out via my [personal email][email].
 [thih]: https://github.com/ocramz/thih
 [thih-pdf]: https://github.com/ocramz/thih
 [warn]: http://moscova.inria.fr/~maranget/papers/warn/warn.pdf
+
+## Contributing
+
+If you wish to help out, please reach out via my [personal email][email].
+
+[email]: mailto:sharp.vik@gmail.com
