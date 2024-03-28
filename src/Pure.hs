@@ -1,11 +1,23 @@
 {-# LANGUAGE FlexibleInstances #-}
 
+-- | This module defines @Pure.Module@. A @Module@ is extracted from source code
+-- by means of parsing (look at @module Pure.Parser@).
+--
+-- In other words @Pure.Module@ is an AST of a module parsed from source.
+-- It is a result of a successful parse but that is all we know about it.
+--
+-- For instance: @type Maybe a b c d e f g is | Some | None;@
+--
+-- This @Maybe@ type declaration is syntactically correct but we can see that
+-- there is a bunch of unused polymorphic type parameters. We will have to deal
+-- with this later through type checking.
 module Pure
   ( Module (..),
     Id,
     moduleNames,
     Definition (..),
     defName,
+    Type (..),
     Expr (..),
   )
 where
@@ -19,9 +31,18 @@ import Strings
     (+-+),
     (+\+),
   )
-import Type (Type (..))
 
 -- TYPES
+
+data Type = Type Id [Type]
+
+instance Parens Type where
+  parens this@(Type _ []) = show this
+  parens t = parenthesised $ show t
+
+instance Show Type where
+  show (Type tag []) = tag
+  show (Type tag args) = tag +-+ unwords (map parens args)
 
 data Module = Module
   { definitions :: [Definition],
