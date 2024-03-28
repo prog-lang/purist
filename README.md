@@ -85,9 +85,11 @@ If you wish to help out, please reach out via my [personal email][email].
 - [Duet][duet] - a subset of Haskell aimed at aiding teachers teach Haskell
 - [PureScript][ps] - a strongly-typed language that compiles to JavaScript
 - [Typing Haskell in Haskell][thih] - a renovated version of the legendary paper
-- [Typing Haskell in Haskell PDF][thih-pdf] - PDF of the original paper
+- [Typing Haskell in Haskell PDF][thih-pdf] - the original paper (PDF)
+- [Warnings for pattern matching][warn] - pattern matching algorithms (PDF)
 
 [duet]: https://github.com/chrisdone/duet
 [ps]: https://github.com/purescript/purescript
 [thih]: https://github.com/ocramz/thih
 [thih-pdf]: https://github.com/ocramz/thih
+[warn]: http://moscova.inria.fr/~maranget/papers/warn/warn.pdf

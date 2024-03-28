@@ -14,7 +14,7 @@ import Data.Functor ((<&>))
 import Data.List (intercalate)
 import Data.Maybe (isJust, mapMaybe)
 import Fun ((!>))
-import Pure (Definition (..), Expr (..), Id, Module (..))
+import Pure (Definition (..), Expr (..), Id, Module (..), Type (..))
 import qualified Pure.Sacred as S
 import Result (Result)
 import qualified Result
@@ -44,7 +44,6 @@ import Text.Parsec.Token
     GenTokenParser (..),
     makeTokenParser,
   )
-import Type (Type (..))
 
 -- STATEMENT
 

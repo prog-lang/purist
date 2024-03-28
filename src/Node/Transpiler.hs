@@ -12,7 +12,6 @@ import qualified Node
 import Pure (Definition ((:=)))
 import qualified Pure
 import Strings (numbered)
-import qualified Type as Pure
 
 type Error = String
 
